@@ -137,5 +137,7 @@ let pos t =
       | T.AppBuiltin (_, l)
       | T.App (_, l) ->
         oneof (stop :: List.mapi (fun i t' -> recurse t' (PB.arg i pb)) l) st
+      | T.Fun (_,bod) ->
+        oneof [stop; recurse bod (PB.body pb)] st
   in
   recurse t PB.empty
