@@ -624,6 +624,10 @@ module Arith = struct
   let () = add_hook pp_hook
 end
 
+module DB = struct
+  let is_closed = T.DB.closed
+end
+
 let debugf = pp
 
 (** {2 TPTP} *)
