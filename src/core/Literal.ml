@@ -336,9 +336,11 @@ let mk_rat_less m1 m2 = mk_rat_op Rat_lit.Less m1 m2
 
 let mk_not_divides n ~power m = mk_divides ~sign:false n ~power m
 
-let mk_ho_constraint l r =
-  if T.is_ho_app l || T.is_ho_var l || T.is_ho_app r || T.is_ho_var r
-  then HO_constraint (l, r)
+let mk_ho_constraint l r = HO_constraint (l, r)
+
+let mk_constraint l r =
+  if T.is_ho_at_root l || T.is_ho_at_root r
+  then mk_ho_constraint l r
   else mk_neq l r
 
 module Seq = struct
@@ -712,7 +714,7 @@ let of_unif_subst ~renaming (s:Unif_subst.t) : t list =
        (* upcast *)
        let t = T.of_term_unsafe t in
        let u = T.of_term_unsafe u in
-       mk_neq t u)
+       mk_constraint t u)
 
 (** {2 IO} *)
 
