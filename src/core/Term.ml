@@ -149,6 +149,16 @@ let fun_ (ty_arg:Type.t) body =
 
 let fun_l args body = List.fold_right fun_ args body
 
+let fun_of_fvars vars body =
+  if vars=[] then body
+  else (
+    List.fold_right
+      (fun v body ->
+         let body = T.DB.from_var body ~var:(var v) in
+         fun_ (HVar.ty v) body)
+      vars body
+  )
+
 let true_ = builtin ~ty:Type.prop Builtin.True
 let false_ = builtin ~ty:Type.prop Builtin.False
 

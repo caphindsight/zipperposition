@@ -103,6 +103,10 @@ val false_ : t
 val fun_: Type.t -> t -> t
 val fun_l : Type.t list -> t -> t
 
+val fun_of_fvars : var list -> t -> t
+(** Build a function from a list of free vars + the body.
+    This performs the De Bruijn transformation. *)
+
 val grounding : Type.t -> t
 (** [grounding ty] is a unique constant of type [ty] *)
 
