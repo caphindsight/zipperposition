@@ -340,6 +340,11 @@ module Arith : sig
   (** hook to print arithmetic expressions *)
 end
 
+(** {2 De Bruijn} *)
+module DB : sig
+  val is_closed : t -> bool
+end
+
 (** {2 TPTP} *)
 
 module TPTP : sig
