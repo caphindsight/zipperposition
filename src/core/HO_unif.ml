@@ -270,6 +270,25 @@ module U = struct
   (* TODO: flex/flex (if they remain, then it means there are only flex/flex
      and we can bind to [λx1…xn. A] where [A] is fresh *)
 
+  (* TODO: special handling of prop-typed pairs (list of true cases/list of
+     false cases? subsume elim_pred_var?) *)
+
+  (* TODO: introduce `if/then/else` for imitating several distinct
+     symbols: [F a = f t, F b = g u] could be imitation with
+     [F := λx. if x=a then f (F1 x) else if x=b then g (F2 x) else F3 x]
+     and constraint [a != b]
+     and new pairs [(F1 a = t), (F2 b = u)]
+  *)
+
+  let whnf_deref subst (t,sc) =
+    let t = match T.view t with
+      | T.Var _ -> Subst.FO.deref subst (t,sc) |> fst
+      | T.App (f, l) when T.is_var f ->
+        T.app (Subst.FO.deref subst (f,sc) |> fst) l
+      | _ -> t
+    in
+    Lambda.whnf t
+
   (* main unification loop *)
   let unif_loop (st:state): unit =
     let sc = st.sc in
@@ -298,11 +317,13 @@ module U = struct
               (* unify types *)
               let subst = Unif.Ty.unify_syn ~subst (T.ty t1,sc) (T.ty t2,sc) in
               (* unify terms *)
-              let t1 = Subst.FO.deref subst (t1,sc) |> fst |> Lambda.whnf in
-              let t2 = Subst.FO.deref subst (t2,sc) |> fst |> Lambda.whnf in
+              let t1 = whnf_deref subst (t1,sc) in
+              let t2 = whnf_deref subst (t2,sc) in
               let hd1, l1 = T.as_app t1 in
               let hd2, l2 = T.as_app t2 in
               begin match T.view hd1, T.view hd2 with
+                | _ when T.equal t1 t2 ->
+                  push_new ~penalty ~offset ~subst [] (* trivial *)
                 | T.Const id1, T.Const id2 ->
                   if ID.equal id1 id2 && List.length l1=List.length l2
                   then (
