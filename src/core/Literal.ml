@@ -908,6 +908,10 @@ module Comp = struct
         let m1 = Multisets.MT.union (M.to_multiset l1) (M.to_multiset r1) in
         let m2 = Multisets.MT.union (M.to_multiset l2) (M.to_multiset r2) in
         Multisets.MT.compare_partial (Ordering.compare ord) m1 m2
+      | HO_constraint (t1,u1), HO_constraint (t2,u2) ->
+        if (T.equal t1 t2 && T.equal u1 u2) ||
+           (T.equal t1 u2 && T.equal u1 t2)
+        then C.Eq else C.Incomparable
       | _, _ ->
         Util.debugf 5 "(@[bad_compare %a %a@])" (fun k->k pp l1 pp l2);
         assert false
