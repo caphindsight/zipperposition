@@ -238,19 +238,13 @@ module Inner = struct
             (* TODO: notion of value, here, to fail fast in some cases *)
             then delay()
             else fail()
+          | T.Var _, _ | _, T.Var _ when op=O_unify ->
+            delay() (* delay for non-syntactic unif *)
           | T.Var _, _
           | _, T.Var _ ->
-            (* currying: unify "from the right" *)
-            begin
-              try
-                let l1, l2 = pair_lists_right f1 l1 f2 l2 in
-                unif_list ~op subst l1 sc1 l2 sc2
-              with Fail ->
-                (* we might delay, for non-syntactic unif, even at the root *)
-                if op=O_unify
-                then delay()
-                else fail()
-            end
+            (* currying: unify "from the right". Only for matching/alpha-eq *)
+            let l1, l2 = pair_lists_right f1 l1 f2 l2 in
+            unif_list ~op subst l1 sc1 l2 sc2
           | _ -> fail()
         end
       | T.AppBuiltin (Builtin.Arrow, ret1::args1),
