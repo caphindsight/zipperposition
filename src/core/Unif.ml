@@ -179,7 +179,7 @@ module Inner = struct
     let view1 = T.view t1 and view2 = T.view t2 in
     (* delay pair, assuming it's closed *)
     let delay() =
-      if T.equal t1 t2 then subst (* trivial *)
+      if T.equal t1 t2 && sc1=sc2 then subst (* trivial *)
       else if T.DB.closed t1 && T.DB.closed t2
       then US.add_constr (Unif_constr.make (t1,sc1)(t2,sc2)) subst
       else raise Fail
@@ -215,8 +215,8 @@ module Inner = struct
       | T.Bind (Binder.Lambda, _, _), _
       | _, T.Bind (Binder.Lambda, _, _) when op=O_unify ->
         delay() (* delay unconditionally, to be dealt with by HO unif *)
-      | T.Bind (Binder.ForallTy, varty1, t1'),
-        T.Bind (Binder.ForallTy, varty2, t2') ->
+      | T.Bind (b1, varty1, t1'),
+        T.Bind (b2, varty2, t2') when b1=b2 ->
         (* FIXME: should carry a "depth" parameter for closedness checks? *)
         let subst = unif_rec ~op ~root:true subst (varty1,sc1) (varty2,sc2) in
         unif_rec ~op ~root:false subst (t1',sc1) (t2',sc2)
@@ -245,6 +245,10 @@ module Inner = struct
           | _, T.Var _ ->
             (* currying: unify "from the right". Only for matching/alpha-eq *)
             let l1, l2 = pair_lists_right f1 l1 f2 l2 in
+            unif_list ~op subst l1 sc1 l2 sc2
+          | _ when op <> O_unify && List.length l1=List.length l2 ->
+            (* try structural matching/variant *)
+            let subst = unif_rec ~op ~root:false subst (f1,sc1) (f2,sc2) in
             unif_list ~op subst l1 sc1 l2 sc2
           | _ -> fail()
         end
