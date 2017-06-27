@@ -437,7 +437,7 @@ module Make(E : Env.S) : S with module Env = E = struct
 end
 
 let enabled_ = ref true
-let enable_unif_ = ref true
+let enable_unif_ = ref false
 let enable_prim_ = ref true
 let prim_max_penalty = ref 15 (* FUDGE *)
 
