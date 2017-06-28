@@ -733,7 +733,7 @@ let rec head t = match view t with
   | App (h, _) -> head h
 
 let type_is_unifiable (ty:t): bool = match view ty with
-  | AppBuiltin ((Builtin.TyInt | Builtin.TyRat), _)
+  | AppBuiltin ((Builtin.TyInt | Builtin.TyRat | Builtin.Prop), _)
   | Bind (Binder.ForallTy, _, _) -> false
   | _ -> true
 
