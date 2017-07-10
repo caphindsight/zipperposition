@@ -256,8 +256,10 @@ let check_unify_gives_unifier =
   in
   QCheck.Test.make ~long_factor:20 ~count:15_000 ~name gen prop
 
+(* σ=mgu(t1,t2) means t1,t2 both match t1σ (== t2σ). In practice, with
+   our matching, it only works for FO terms *)
 let check_unifier_matches =
-  let gen = QCheck.(pair gen_t gen_t) in
+  let gen = QCheck.(pair gen_fo gen_fo) in
   let name = "unifier_matches_unified_terms" in
   let prop (t1, t2) =
     try
@@ -268,8 +270,10 @@ let check_unifier_matches =
       if Unif.FO.matches ~pattern:t1 t1' &&
          Unif.FO.matches ~pattern:t2 t2'
       then true
-      else QCheck.Test.fail_reportf
-          "subst=%a,@ t1'=`%a`,@ t2'=`%a`" Subst.pp subst T.pp t1' T.pp t2'
+      else ( QCheck.Test.fail_reportf
+          "(@[<hv2>subst=%a,@ t1'=`%a`,@ t2'=`%a`@])"
+          Subst.pp subst T.pp t1' T.pp t2'
+      )
     with Unif.Fail -> QCheck.assume_fail()
   in
   QCheck.Test.make ~long_factor:20 ~count:15_000 ~name gen prop
